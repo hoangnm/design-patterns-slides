@@ -41,11 +41,11 @@
 
 # Introduction to OOP
 - **SOLID Principles**:
-    1. **Single Responsibility (S)**:
-    2. **Open/Closed (O)**:
-    3. **Liskov Substitution (L)**:
-    4. **Interface Segregation (I)**:
-    5. **Dependency Inversion (D)**:
+    1. **Single Responsibility (S)**
+    2. **Open/Closed (O)**
+    3. **Liskov Substitution (L)**
+    4. **Interface Segregation (I)**
+    5. **Dependency Inversion (D)**
 ---
 
 # SOLID Principles
@@ -82,7 +82,7 @@
 - **Dependency Inversion (D)**:
     - High-level modules should not depend on low-level modules
     - Both should depend on abstractions
-    - Example: link
+    - Example: ![Dependency Inversion](examples/dependency_inversion.md)
 ---
 
 # SOLID Principles
@@ -243,33 +243,34 @@ How about the design patterns for complex business applications?
 
 ---
 
-# Domain-Driven Design (DDD)
-- **Definition**: A software design approach focusing on modeling software to match a domain according to input from domain experts.
+# Traditional Layered Architecture
+- **Common Structure**:
+    - Presentation Layer (UI)
+    - Application Layer (Services)
+    - Domain Layer (Business Logic)
+    - Infrastructure Layer (Data Access)
 
 ---
 
-# Domain-Driven Design (DDD)
-- **Key Concepts**:
-    1. **Ubiquitous Language**
-    2. **Bounded Contexts**
-    3. **Domain Model**
-    4. **Building Blocks**
-        - **Entities**: Objects with identity and lifecycle
-        - **Value Objects**: Immutable objects without identity
-        - **Aggregates**: Cluster of associated objects treated as a unit
-        - **Services**: Operations that don't belong to any entity
-        - **Repositories**: Persistence abstraction for aggregates
-
-- **Example**: link
+# Limitations of Layered Architecture
+- **Problems with Scale**:
+    - Layers become tightly coupled over time
+    - Business logic leaks between layers
+    - Domain model becomes anemic
+    - Changes require updates across all layers
+    - Hard to maintain as complexity grows
+    - Difficult to enforce boundaries
+    - Often leads to "Big Ball of Mud"
 
 ---
 
-# Domain-Driven Design (DDD)
-- **Benefits**:
-    - Aligns code with business requirements
-    - Improves communication between technical and domain experts
-    - Creates maintainable and flexible domain models
-    - Handles complex business logic effectively
+# Need for Better Architecture
+- **Why Traditional Layers Fall Short**:
+    - Business rules mixed with technical concerns
+    - Domain logic scattered across layers
+    - No clear boundaries between different parts of the system
+    - Difficult to implement complex business rules
+    - Hard to maintain and evolve
 
 ---
 
@@ -279,11 +280,7 @@ How about the design patterns for complex business applications?
 ---
 
 # Clean Architecture
-- **Structure**:
-    1. **Entities Layer** (Core)
-    2. **Use Cases Layer**
-    3. **Interface Adapters Layer**
-    4. **Frameworks & Drivers Layer** (External)
+
 
 ---
 
@@ -294,6 +291,116 @@ How about the design patterns for complex business applications?
     - **Isolation**: Business rules isolated from UI and database
     - **Testability**: The architecture facilitates automated testing by isolating components.
 
+---
+
+# Clean Architecture
+- **Structure**:
+    1. **Entities Layer** (Core):
+    2. **Use Cases Layer**
+    3. **Interface Adapters Layer**
+    4. **Frameworks & Drivers Layer** (External)
+
+
+---
+
+# Clean Architecture
+- **Entities**:
+    - Contains enterprise-wide business rules and data structures
+    - Pure business objects with no dependencies
+    - Represents core business concepts (e.g., Customer, Order, Product)
+    - Has no knowledge of other layers
+    - Most stable layer, changes least frequently
+    - Contains validation rules that are universally true for the entity
+
+---
+
+# Clean Architecture
+- **Use Cases Layer**:
+    - Implements application-specific business rules
+    - Orchestrates the flow of data to and from entities
+    - Characteristics:
+        - One class per use case (e.g., CreateOrderUseCase, UpdateUserProfileUseCase)
+        - Independent of UI, database, and external concerns
+        - Uses interfaces (ports) to communicate with outer layers
+        - Contains input/output boundary interfaces
+        - Defines DTOs (Data Transfer Objects) for input/output
+    - Responsibilities:
+        - Validation of business rules
+        - Authorization checks
+        - Orchestrating multiple entities
+        - Managing transactions
+
+---
+
+# Clean Architecture
+- **Interface Adapters Layer**:
+    - Converts data between the format most convenient for use cases/entities and the format most convenient for external agencies
+    - Contains:
+        - **Controllers**: Handle HTTP requests, CLI commands, or other entry points
+        - **Presenters**: Format data for display (UI, API responses, etc.)
+        - **Gateways**: Abstract interfaces for external services
+        - **Repositories**: Implement data access interfaces defined by use cases
+    - Characteristics:
+        - No business rules
+        - Purely technical implementations
+        - Implements interfaces defined by inner layers
+    - Responsibilities:
+        - Data format conversion
+        - Request/Response handling
+        - Input validation
+        - Error handling and mapping
+        - Database operations
+        - External service integration
+
+---
+
+# Clean Architecture
+- **Interface Adapters Layer**:
+- Example Components:
+    - REST Controllers
+    - GraphQL Resolvers
+    - Database Repositories
+    - External API Clients
+    - View Models/DTOs
+    - JSON/XML Formatters
+
+---
+
+# Clean Architecture
+- **Frameworks & Drivers Layer**:
+    - Outermost layer containing frameworks and tools
+    - Acts as glue code connecting the application to external world
+    - Contains:
+        - **Web Frameworks**: Express, Spring, Django, etc.
+        - **Database Systems**: MySQL, MongoDB, PostgreSQL
+        - **UI Frameworks**: React, Angular, Vue
+        - **External Services**: Payment gateways, email services
+    - Characteristics:
+        - Highly volatile and changeable
+        - Contains configuration code
+        - Minimal business logic
+        - Easily replaceable
+    - Responsibilities:
+        - Framework configuration
+        - Database setup and migration
+        - External service integration
+        - Web server setup
+        - UI implementation
+        - File I/O operations
+    
+
+---
+
+
+# Clean Architecture
+- **Frameworks & Drivers Layer**:
+- Example Components:
+    - Web server configuration
+    - Database connection setup
+    - ORM configurations
+    - UI components
+    - External API configurations
+    - File system operations
 ---
 
 # Clean Architecture
@@ -316,53 +423,262 @@ How about the design patterns for complex business applications?
 
 ---
 
+# Domain-Driven Design (DDD)
+- **Definition**: A software design approach focusing on modeling software to match a domain according to input from domain experts.
+
+---
+
+# Domain-Driven Design (DDD)
+- **Key Concepts**:
+    1. **Ubiquitous Language**
+    2. **Bounded Contexts**
+    3. **Domain Model**
+    4. **Building Blocks**
+        - **Entities**: Objects with identity and lifecycle
+        - **Value Objects**: Immutable objects without identity
+        - **Aggregates**: Cluster of associated objects treated as a unit
+        - **Services**: Operations that don't belong to any entity
+
+- **Example**: link
+
+---
+
+# Domain Model in DDD
+- **Definition**:
+    - A conceptual model of the domain that incorporates both behavior and data
+    - The heart of the business software
+    - A structured vision of the domain
+    - Distillation of shared knowledge
+
+- **Characteristics**:
+    - Rich in behavior (not anemic)
+    - Encapsulates complex business rules
+    - Reflects domain expert's mental model
+    - Independent of technical concerns
+    - Uses ubiquitous language
+
+- **Components**:
+    ```java
+    // Rich Domain Model Example
+    public class Order {
+        private List<OrderLine> lines;
+        private Customer customer;
+        private OrderStatus status;
+        private Money totalAmount;
+
+        public void addProduct(Product product, int quantity) {
+            validateProduct(product);
+            validateQuantity(quantity);
+            
+            OrderLine line = new OrderLine(product, quantity);
+            lines.add(line);
+            recalculateTotal();
+        }
+
+        public void confirm() {
+            validateOrderCanBeConfirmed();
+            status = OrderStatus.CONFIRMED;
+            notifyCustomer();
+        }
+
+        private void validateOrderCanBeConfirmed() {
+            if (lines.isEmpty()) {
+                throw new OrderDomainException("Cannot confirm empty order");
+            }
+            if (!customer.hasGoodStanding()) {
+                throw new OrderDomainException("Customer not in good standing");
+            }
+        }
+
+        private void recalculateTotal() {
+            totalAmount = lines.stream()
+                .map(OrderLine::getLineTotal)
+                .reduce(Money.ZERO, Money::add);
+        }
+    }
+    ```
+
+- **Implementation Guidelines**:
+    - Keep business rules in the domain model
+    - Use value objects for concepts without identity
+    - Create rich behavior instead of anemic models
+    - Enforce invariants within the model
+    - Use domain events for side effects
+    - Apply tactical patterns appropriately
+
+- **Benefits**:
+    - Captures complex business rules accurately
+    - Provides single source of truth for domain logic
+    - Makes business rules explicit and testable
+    - Reduces bugs in business logic
+    - Improves maintainability
+    - Facilitates communication with domain experts
+
+---
+
+# Bounded Contexts in DDD
+- **Definition**:
+    - Explicit boundary within which a domain model exists
+    - Defines where specific terms and concepts of Ubiquitous Language apply
+    - Separates different parts of a large system
+
+- **Characteristics**:
+    - Each context has its own Ubiquitous Language
+    - Same term can mean different things in different contexts
+    - Clear boundaries between different parts of the system
+    - Independent implementation within each context
+
+- **Example**:
+    In an e-commerce system:
+    ```java
+    // Shipping Context
+    class Product {
+        private Weight weight;
+        private Dimensions dimensions;
+        private ShippingCategory category;
+    }
+
+    // Inventory Context
+    class Product {
+        private StockLevel currentStock;
+        private Location storageLocation;
+        private ReorderPoint reorderLevel;
+    }
+
+    // Sales Context
+    class Product {
+        private Price retailPrice;
+        private Discount currentDiscount;
+        private Category marketingCategory;
+    }
+    ```
+
+- **Context Mapping**:
+    - **Types of Relationships**:
+        - Partnership: Two contexts collaborate
+        - Shared Kernel: Shared subset of domain model
+        - Customer-Supplier: Upstream/Downstream relationship
+        - Conformist: Downstream adopts upstream model
+        - Anti-corruption Layer: Translator between contexts
+    
+- **Implementation Strategies**:
+    - Separate modules or services per context
+    - Different database schemas
+    - Independent deployment units
+    - Context-specific data models
+    - Clear interface contracts between contexts
+
+- **Benefits**:
+    - Reduces complexity by dividing system
+    - Allows parallel development
+    - Enables different modeling approaches per context
+    - Prevents model pollution
+    - Clarifies team boundaries
+    - Supports microservices architecture
+
+---
+
+# Ubiquitous Language in DDD
+- **Definition**: 
+    - A common, rigorous language between developers and domain experts
+    - Shared vocabulary that is used in code, documentation, and conversation
+    - Evolves as the team's understanding of the domain grows
+
+- **Characteristics**:
+    - **Precision**: Terms have specific, agreed-upon meanings
+    - **Consistency**: Same terms used everywhere in the bounded context
+    - **Evolution**: Language grows and changes with the project
+    - **Documentation**: Captured in code, tests, and documentation
+
+- **Implementation**:
+    - Use domain terms in class names (e.g., `OrderConfirmation` not `ProcessResult`)
+    - Model methods after business processes (e.g., `confirmOrder()` not `updateStatus()`)
+    - Name variables using domain terminology
+    - Document using business language
+    - Avoid technical terms in domain logic
+
+- **Benefits**:
+    - Reduces translation between technical and business concepts
+    - Improves communication with domain experts
+    - Makes code self-documenting
+    - Ensures consistent understanding across team
+    - Helps identify domain concepts early
+
+- **Example**:
+    ```java
+    // Poor ubiquitous language
+    class DataProcessor {
+        void process(Data input) {
+            if (input.getStatus() == 1) {
+                updateRecords(input);
+            }
+        }
+    }
+
+    // Good ubiquitous language
+    class OrderProcessor {
+        void confirmOrder(Order order) {
+            if (order.isPendingConfirmation()) {
+                order.confirm();
+            }
+        }
+    }
+    ```
+
+---
+
+# Domain-Driven Design (DDD)
+- **Benefits**:
+    - Aligns code with business requirements
+    - Improves communication between technical and domain experts
+    - Creates maintainable and flexible domain models
+    - Handles complex business logic effectively
+
+---
+
 # Conclusion
 - **Recap**: OOP promotes structured, maintainable code, and design patterns provide solutions for common design problems.
 - **Importance of Clean Architecture**: Combines OOP and design principles to create scalable, maintainable, and testable systems.
 
 ---
 
-# Practice Exercises
-
-## Exercise 1: Factory Pattern
-Create a document processing system that can handle different types of documents (PDF, Word, Text).
-Requirements:
-- Implement a Document interface with methods: open(), save()
-- Create concrete classes for each document type
-- Implement a DocumentFactory to create appropriate document objects
-- Add functionality to process documents based on file extension
-
-## Exercise 2: Observer Pattern
-Build a weather monitoring system.
-Requirements:
-- Create a WeatherStation that monitors temperature, humidity, and pressure
-- Implement multiple display devices (Phone, Website, Desktop App)
-- Ensure displays are updated when weather data changes
-- Allow displays to subscribe/unsubscribe from updates
-
-## Exercise 3: Adapter Pattern
-Design a payment processing system that works with different payment gateways.
-Requirements:
-- Create a common PaymentProcessor interface
-- Implement adapters for PayPal, Stripe, and legacy payment system
-- Each system has different methods that need to be adapted
-- Handle currency conversion if needed
-
-## Exercise 4: Clean Architecture
+# Exercise: Clean Architecture
 Design a library management system using Clean Architecture principles.
 Requirements:
 - Implement core entities (Book, Member, Loan)
 - Create use cases for borrowing/returning books
 - Add interface adapters for web and console interfaces
 - Implement persistence using different databases
+---
 
-Tips for Exercises:
-1. Start with simple implementations
-2. Focus on pattern principles
-3. Add complexity gradually
-4. Write tests for your implementations
-5. Consider edge cases
-6. Document your design decisions
+# Common Pitfalls to Avoid
+- **Wrong Abstraction**: A wrong abstraction is worse than code duplication
+    - Duplicate code is better than the wrong abstraction
+    - Wait until you see the pattern emerge from duplication
+    - Don't force patterns where they don't fit
+- **Over-Engineering**: Start simple, add complexity only when needed
+    - Don't add flexibility that you don't need yet
+    - YAGNI (You Aren't Gonna Need It)
+---
+
+# References
+
+---
 
 # Q&A
 - **Any Questions?**
+
+
+TODO
+https://refactoring.guru/refactoring
+find websites for design patterns reference
+give problems per pattern categories and guide people how to find the pattern to apply
+explain image concepts, how to read the patterns
+give bad example then good example after refactoring
+mention about layer architecture and why it could not scale if the complexity is high
+then DDD combining with clean architecture can help
+more content about ddd
+explain common pitfalls while using clean architecture
+web and book references
+
+the goal of this presentation is to helps people understand the high level concept and they can learn deeper later

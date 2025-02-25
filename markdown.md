@@ -667,18 +667,3 @@ Requirements:
 
 # Q&A
 - **Any Questions?**
-
-
-TODO
-https://refactoring.guru/refactoring
-find websites for design patterns reference
-give problems per pattern categories and guide people how to find the pattern to apply
-explain image concepts, how to read the patterns
-give bad example then good example after refactoring
-mention about layer architecture and why it could not scale if the complexity is high
-then DDD combining with clean architecture can help
-more content about ddd
-explain common pitfalls while using clean architecture
-web and book references
-
-the goal of this presentation is to helps people understand the high level concept and they can learn deeper later

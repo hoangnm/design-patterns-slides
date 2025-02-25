@@ -107,11 +107,4 @@ public class OrderRepository {
    - Infrastructure concerns leak upwards
    - Cross-cutting concerns scattered everywhere
 
-This code structure leads to:
-- Difficult maintenance
-- Hard to test
-- Complex dependencies
-- Rigid and inflexible design
-- Business rules hard to find and change
-- Poor reusability
 

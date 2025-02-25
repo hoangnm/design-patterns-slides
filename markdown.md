@@ -233,9 +233,26 @@
 # Observer pattern
 
 - **When to Use**:
-    - **Event Handling**
-    - **Loose Coupling**
-    - **Broadcasting**:
+    - **Event Handling Systems**:
+        - GUI frameworks (button clicks, form submissions)
+        - System state changes (file system watchers)
+        - Real-time data updates (stock prices, sensor readings)
+    - **Distributed Systems**:
+        - Message queues
+        - Publish/subscribe systems
+        - Event-driven architectures
+    - **Business Process Monitoring**:
+        - Order status tracking
+        - Workflow state changes
+        - Audit logging
+    - **Cross-cutting Concerns**:
+        - Logging
+        - Performance monitoring
+        - Analytics tracking
+    - **Decoupled Communication**:
+        - When objects need to communicate without direct knowledge of each other
+        - Multiple objects need to react to state changes
+        - Dynamic subscriber registration/unregistration is needed
 
 ---
 

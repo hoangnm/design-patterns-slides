@@ -1,53 +1,56 @@
 # Facade Pattern Example
 
-## Problem: Complex E-commerce Order Processing System
+## Problem: Complex Media Conversion System
 
-Imagine you have a complex e-commerce system with multiple subsystems handling different aspects of order processing:
-- Inventory checking
-- Payment processing
-- Shipping calculation
-- Customer notification
-- Order tracking
-- Warehouse management
+Imagine you're building a multimedia processing system that needs to:
+- Convert video formats
+- Extract audio
+- Generate thumbnails
+- Apply filters
+- Add watermarks
+- Handle metadata
 
 ### The Problem Without Facade
 
 ```java
-// Client code dealing directly with multiple subsystems - Complex and Messy
-public class OrderProcessor {
-    private InventorySystem inventorySystem;
-    private PaymentGateway paymentGateway;
-    private ShippingCalculator shippingCalculator;
-    private NotificationService notificationService;
-    private WarehouseSystem warehouseSystem;
-    private OrderTracker orderTracker;
+// Client code dealing directly with complex media operations
+public class MediaConverter {
+    private VideoProcessor videoProcessor;
+    private AudioExtractor audioExtractor;
+    private ThumbnailGenerator thumbnailGenerator;
+    private FilterApplier filterApplier;
+    private WatermarkApplier watermarkApplier;
+    private MetadataHandler metadataHandler;
 
-    public void processOrder(Order order) {
-        // Client needs to know about all subsystems and their operations
-        if (inventorySystem.checkStock(order.getItems())) {
-            double shippingCost = shippingCalculator.calculateShipping(
-                order.getItems(), 
-                order.getShippingAddress()
-            );
-            
-            PaymentDetails payment = new PaymentDetails(
-                order.getTotalAmount() + shippingCost,
-                order.getPaymentMethod()
-            );
-            
-            if (paymentGateway.processPayment(payment)) {
-                PickingSlip pickingSlip = warehouseSystem.generatePickingSlip(order);
-                warehouseSystem.schedulePickup(pickingSlip);
-                
-                TrackingNumber trackingNum = orderTracker.createTracking(order);
-                
-                notificationService.sendConfirmation(
-                    order.getCustomerEmail(),
-                    order,
-                    trackingNum
-                );
-            }
-        }
+    public void convertVideo(String inputPath, String outputPath, String format) {
+        // Client needs to understand all the technical details and steps
+        VideoMetadata metadata = metadataHandler.extractMetadata(inputPath);
+        
+        // Video processing setup
+        VideoSettings settings = new VideoSettings(
+            metadata.getCodec(),
+            metadata.getBitrate(),
+            metadata.getResolution()
+        );
+        
+        // Complex conversion process
+        byte[] videoData = videoProcessor.readVideo(inputPath);
+        byte[] convertedVideo = videoProcessor.convert(videoData, format, settings);
+        
+        // Audio handling
+        byte[] audioData = audioExtractor.extract(videoData);
+        byte[] convertedAudio = audioExtractor.convert(audioData, format);
+        
+        // Generate preview
+        byte[] thumbnail = thumbnailGenerator.generate(videoData);
+        
+        // Apply effects
+        convertedVideo = filterApplier.apply(convertedVideo, "enhance");
+        convertedVideo = watermarkApplier.apply(convertedVideo, "Copyright 2024");
+        
+        // Save everything
+        videoProcessor.save(convertedVideo, outputPath);
+        thumbnailGenerator.save(thumbnail, outputPath + "_thumb.jpg");
     }
 }
 ```
@@ -55,87 +58,109 @@ public class OrderProcessor {
 ### Solution Using Facade Pattern
 
 ```java
-// Facade provides simple interface to complex subsystems
-public class OrderProcessingFacade {
-    private InventorySystem inventorySystem;
-    private PaymentGateway paymentGateway;
-    private ShippingCalculator shippingCalculator;
-    private NotificationService notificationService;
-    private WarehouseSystem warehouseSystem;
-    private OrderTracker orderTracker;
+// Simple interface for complex media operations
+public class MediaConversionFacade {
+    private VideoProcessor videoProcessor;
+    private AudioExtractor audioExtractor;
+    private ThumbnailGenerator thumbnailGenerator;
+    private FilterApplier filterApplier;
+    private WatermarkApplier watermarkApplier;
+    private MetadataHandler metadataHandler;
 
-    public OrderResult processOrder(Order order) {
+    public MediaConversionResult convertMedia(
+        String inputPath, 
+        MediaConversionOptions options
+    ) {
         try {
-            // Facade handles all the complexity internally
-            validateInventory(order);
-            double totalCost = calculateTotalCost(order);
-            processPayment(order, totalCost);
-            TrackingNumber tracking = initiateShipping(order);
-            notifyCustomer(order, tracking);
+            // Facade handles all complexity internally
+            VideoMetadata metadata = extractMetadata(inputPath);
+            byte[] convertedVideo = processVideo(inputPath, metadata, options);
+            byte[] thumbnail = generateThumbnail(convertedVideo, options);
             
-            return new OrderResult(
-                OrderStatus.PROCESSED,
-                tracking,
-                totalCost
+            saveResults(convertedVideo, thumbnail, options.getOutputPath());
+            
+            return new MediaConversionResult(
+                options.getOutputPath(),
+                metadata,
+                options.getFormat()
             );
-        } catch (OrderProcessingException e) {
-            return new OrderResult(
-                OrderStatus.FAILED,
-                null,
-                0,
-                e.getMessage()
+        } catch (ConversionException e) {
+            return MediaConversionResult.failure(e.getMessage());
+        }
+    }
+
+    private VideoMetadata extractMetadata(String inputPath) {
+        return metadataHandler.extractMetadata(inputPath);
+    }
+
+    private byte[] processVideo(
+        String inputPath, 
+        VideoMetadata metadata,
+        MediaConversionOptions options
+    ) {
+        VideoSettings settings = createVideoSettings(metadata, options);
+        byte[] videoData = videoProcessor.readVideo(inputPath);
+        byte[] convertedVideo = videoProcessor.convert(
+            videoData, 
+            options.getFormat(), 
+            settings
+        );
+
+        if (options.isEnhanceVideo()) {
+            convertedVideo = filterApplier.apply(convertedVideo, "enhance");
+        }
+
+        if (options.getWatermarkText() != null) {
+            convertedVideo = watermarkApplier.apply(
+                convertedVideo, 
+                options.getWatermarkText()
             );
         }
+
+        return convertedVideo;
     }
 
-    private void validateInventory(Order order) {
-        if (!inventorySystem.checkStock(order.getItems())) {
-            throw new OrderProcessingException("Insufficient inventory");
+    private byte[] generateThumbnail(
+        byte[] videoData, 
+        MediaConversionOptions options
+    ) {
+        if (!options.isGenerateThumbnail()) {
+            return null;
         }
+        return thumbnailGenerator.generate(videoData);
     }
 
-    private double calculateTotalCost(Order order) {
-        double shippingCost = shippingCalculator.calculateShipping(
-            order.getItems(),
-            order.getShippingAddress()
-        );
-        return order.getTotalAmount() + shippingCost;
-    }
-
-    private void processPayment(Order order, double totalCost) {
-        PaymentDetails payment = new PaymentDetails(
-            totalCost,
-            order.getPaymentMethod()
-        );
-        
-        if (!paymentGateway.processPayment(payment)) {
-            throw new OrderProcessingException("Payment failed");
+    private void saveResults(
+        byte[] video, 
+        byte[] thumbnail, 
+        String outputPath
+    ) {
+        videoProcessor.save(video, outputPath);
+        if (thumbnail != null) {
+            thumbnailGenerator.save(thumbnail, outputPath + "_thumb.jpg");
         }
-    }
-
-    private TrackingNumber initiateShipping(Order order) {
-        PickingSlip pickingSlip = warehouseSystem.generatePickingSlip(order);
-        warehouseSystem.schedulePickup(pickingSlip);
-        return orderTracker.createTracking(order);
-    }
-
-    private void notifyCustomer(Order order, TrackingNumber tracking) {
-        notificationService.sendConfirmation(
-            order.getCustomerEmail(),
-            order,
-            tracking
-        );
     }
 }
 
-// Client code - Simple and Clean
-public class OrderProcessor {
-    private OrderProcessingFacade orderProcessingFacade;
+// Clean client code
+public class VideoConverter {
+    private MediaConversionFacade conversionFacade;
 
-    public void processOrder(Order order) {
-        OrderResult result = orderProcessingFacade.processOrder(order);
-        if (result.getStatus() == OrderStatus.FAILED) {
-            handleFailure(result);
+    public void convertVideo(String inputPath, String format) {
+        MediaConversionOptions options = new MediaConversionOptions.Builder()
+            .setFormat(format)
+            .setEnhanceVideo(true)
+            .setGenerateThumbnail(true)
+            .setWatermarkText("Copyright 2024")
+            .build();
+
+        MediaConversionResult result = conversionFacade.convertMedia(
+            inputPath, 
+            options
+        );
+
+        if (!result.isSuccess()) {
+            handleError(result.getError());
         }
     }
 }
@@ -143,38 +168,30 @@ public class OrderProcessor {
 
 ## Benefits of Using Facade Pattern Here:
 
-1. **Simplifies Complex Interface**:
-   - Hides complexity of multiple subsystems
-   - Provides single entry point
-   - Reduces coupling between client and subsystems
+1. **Simplifies Complex Media Processing**:
+   - Hides technical details of video/audio processing
+   - Provides simple interface for complex operations
+   - Manages multiple processing steps internally
 
-2. **Better Error Handling**:
-   - Centralizes error handling
-   - Provides consistent error reporting
-   - Easier to implement retry logic
+2. **Better Configuration Management**:
+   - Options builder pattern for settings
+   - Default values handled by facade
+   - Flexible configuration without complexity
 
-3. **Improved Maintainability**:
-   - Changes to subsystems don't affect client code
-   - Easy to modify internal implementation
-   - Better organization of subsystem interactions
+3. **Improved Error Handling**:
+   - Centralized error management
+   - Consistent error reporting
+   - Clean error recovery options
 
-4. **Enhanced Testability**:
-   - Can mock facade instead of multiple subsystems
-   - Easier to write integration tests
-   - Simplified test scenarios
+4. **Enhanced Maintainability**:
+   - Each subsystem can be modified independently
+   - Easy to add new processing features
+   - Clear separation of concerns
 
 ## When to Use This Pattern:
 
-- Complex system with multiple subsystems
-- Need to provide simple interface to complex system
-- Want to layer your subsystems
-- Need to decouple client code from subsystems
-- Want to reduce dependencies between client and subsystems
+- Multiple processing steps needed
+- Various configuration options
+- Need to hide technical complexity
+- Want to provide simple interface
 
-## Common Use Cases:
-
-1. E-commerce Systems
-2. Financial Systems
-3. Library Management Systems
-4. Enterprise Integration
-5. API Gateways

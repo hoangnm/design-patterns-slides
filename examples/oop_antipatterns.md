@@ -303,6 +303,39 @@ class UserService {
 - Follow Command-Query Separation principle: methods should either return information OR modify state, not both
 - Make side effects explicit in method names (e.g., `getUserAndUpdateLastLogin()`)
 
+## 12. Deep Inheritance Hierarchies
+
+**Problem**: Creating inheritance trees that are too deep, making code difficult to understand and maintain.
+
+**Symptoms**:
+- Inheritance chains with more than 3-4 levels
+- Difficulty understanding which class defines or overrides a method
+- Changes to base classes having unexpected effects on distant descendants
+- Code that requires knowledge of multiple levels of the hierarchy to understand
+
+**Example**:
+```java
+// Anti-pattern: Deep inheritance hierarchy
+class Vehicle { /* ... */ }
+class MotorVehicle extends Vehicle { /* ... */ }
+class Automobile extends MotorVehicle { /* ... */ }
+class Car extends Automobile { /* ... */ }
+class Sedan extends Car { /* ... */ }
+class LuxurySedan extends Sedan { /* ... */ }
+class SportLuxurySedan extends LuxurySedan { /* ... */ }
+
+// Using a class from deep in the hierarchy requires understanding
+// all the parent classes and their interactions
+SportLuxurySedan car = new SportLuxurySedan();
+car.startEngine(); // Where is this defined? Vehicle? MotorVehicle? Car?
+```
+
+**Solution**:
+- Limit inheritance depth to 2-3 levels
+- Use composition over inheritance
+- Create flatter hierarchies with interfaces
+- Consider delegation instead of extending classes
+
 ## Avoiding These Anti-Patterns
 
 To avoid these anti-patterns:
@@ -316,3 +349,4 @@ To avoid these anti-patterns:
 7. **Review code with team members**
 8. **Be explicit about side effects**
 9. **Follow Command-Query Separation principle**
+10. **Limit inheritance depth**

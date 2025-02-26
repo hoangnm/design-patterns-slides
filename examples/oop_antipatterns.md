@@ -268,6 +268,41 @@ class CustomerReport { /* ... */ }
 
 **Solution**: Improve cohesion and reduce coupling. Apply the Single Responsibility Principle.
 
+## 11. Methods with Unexpected Side Effects
+
+**Problem**: Methods that perform hidden actions beyond what their name suggests.
+
+**Symptoms**:
+- Methods that modify state not implied by their name
+- Methods with misleading names
+- Unpredictable behavior when methods are called
+
+**Example**:
+```java
+class UserService {
+    public User getUser(String id) {
+        User user = userRepository.findById(id);
+        
+        // A side effect but acceptable
+        auditLog.recordAccess(id);
+        
+        // unexpected side effect!
+        if (user.getLastLogin() == null) {
+            user.setLastLogin(new Date());
+            userRepository.save(user);
+        }
+        
+        return user;
+    }
+}
+```
+
+**Solution**: 
+- Name methods to clearly indicate all effects they have
+- Separate query operations from command operations
+- Follow Command-Query Separation principle: methods should either return information OR modify state, not both
+- Make side effects explicit in method names (e.g., `getUserAndUpdateLastLogin()`)
+
 ## Avoiding These Anti-Patterns
 
 To avoid these anti-patterns:
@@ -279,3 +314,5 @@ To avoid these anti-patterns:
 5. **Use design patterns appropriately**
 6. **Refactor regularly**
 7. **Review code with team members**
+8. **Be explicit about side effects**
+9. **Follow Command-Query Separation principle**
